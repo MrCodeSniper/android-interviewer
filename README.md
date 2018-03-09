@@ -26,7 +26,9 @@ hashtable是继承自dictionary类实现map接口的 同步且元素不能为空
 
 queue队列 先进先出
 stack栈 先进后出
-https://upload-images.jianshu.io/upload_images/898312-a5d959e2a6d5b353.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/613
+
+![集合框架](https://upload-images.jianshu.io/upload_images/898312-a5d959e2a6d5b353.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/613)
+
 
 
 
