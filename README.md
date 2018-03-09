@@ -43,7 +43,13 @@ activity走向终点准备销毁时会执行 onDestory()函数  在此时做一�
 在onStop()之后若从 后台返回前台 会执行onRestart()函数返回onStart()函数重新执行
 
 activity启动模式
+每启动一个activity会把此放到一个stack的顶端 启动模式是用来处理activity与栈的分配关系
+启动模式有四种:standrad,singletop,singleinstance,singletask
 
+standrad 每启动一个activity创建一个实例 哪个activity启动他就进那个activity所在的stack顶部
+singletop 栈顶复用模式 当要启动的acitivity处于栈顶 不产生实例而是调用onNewIntent()函数
+singletask 栈内复用模式 当要启动的acitivity处于栈内 不产生实例而是调用onNewIntent()函数
+singleinstance 单实例模式  在栈内复用的基础上 一个activity占领一个栈  
 
 
 
