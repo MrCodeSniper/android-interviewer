@@ -50,6 +50,7 @@ standrad 每启动一个activity创建一个实例 哪个activity启动他就进
 singletop 栈顶复用模式 当要启动的acitivity处于栈顶 不产生实例而是调用onNewIntent()函数
 singletask 栈内复用模式 当要启动的acitivity处于栈内 不产生实例而是调用onNewIntent()函数
 singleinstance 单实例模式  在栈内复用的基础上 一个activity占领一个栈  
+
 3.你能说出几种设计模式？能写出单例模式的几种方式？
 这个题考验的是基本功-设计模式 设计模式
 
