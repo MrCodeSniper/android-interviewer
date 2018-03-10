@@ -50,6 +50,84 @@ standrad 每启动一个activity创建一个实例 哪个activity启动他就进
 singletop 栈顶复用模式 当要启动的acitivity处于栈顶 不产生实例而是调用onNewIntent()函数
 singletask 栈内复用模式 当要启动的acitivity处于栈内 不产生实例而是调用onNewIntent()函数
 singleinstance 单实例模式  在栈内复用的基础上 一个activity占领一个栈  
+3.你能说出几种设计模式？能写出单例模式的几种方式？
+这个题考验的是基本功-设计模式 设计模式
+
+part1.单例模式-保证app中只有此一个实例
+单例的实现方式：
+1.懒汉式 在第一次使用时构建
+2.饿汉式 在类被装载时构建
+
+懒汉式具体代码
+```
+public class Singleton(){
+    private static Singleton instance;
+    private Singleton(){}//构造方法私有化
+    public static Singleton getInstance(){
+        if(instance==null){
+          instance=new Singleton();
+        }
+        return instance;
+    }
+}
+```
+但是当多线程同时执行这个函数且实例都为空时会创建各自的实例 这样就不会是单例了 所以需要线程同步    
+public static synchronized Singleton getInstance() 但是如此的话加了锁之后会引起其他线程等待锁释放大大影响效率——同步单锁懒汉式
+所以又在加锁之前进行判断使得有非空实例的线程无需经过锁机制 增加了效率
+但java编译器 在执行时会有指令重排序会发生，所以需对变量加volatile 以防其他线程读 当本线程写时 防止出错发生
+```
+//最终懒汉式 双重检查锁
+public class Singleton(){
+    private static volatile Singleton instance;
+    private Singleton(){}//构造方法私有化
+    public static Singleton getInstance(){
+        if(instance==null){
+          synchronized (Singleton.class) {
+               if (instance == null) {
+                    instance = new Singleton();
+                }
+           }
+        }
+        return instance;
+    }
+}
+```
+饿汉式具体代码
+
+```
+public class Singleton(){
+    private static Singleton instance=new Singleton();//类装载时创建实例 缺点初始化的时机很难把控 适合占用资源少的实例
+    private Singleton(){}
+    public static Singleton getInstance(){
+        return instance;
+    }
+}
+```
+
+其他实现方式
+
+1.静态内部类
+```
+public static Singleton(){// 使得第一此使用时才类装载 两种方式得结合
+     private static class SingleHolder(){
+         private static final Singleton INSTANCE=new Singleton();
+      }
+       private Singleton(){}
+       public static Singleton getInstance(){
+        return SingleHolder.INSTANCE;
+     }
+
+}
+
+```
+2.枚举
+```
+public enum SingleInstance {// 使用SingleInstance.INSTANCE.fun1(); 枚举内部 线程安全且不会出现指令重排序 且也是两种方式结合 在需要继承得方式不适用
+    INSTANCE;
+    public void fun1() {
+        // do something
+    }
+```
 
 
 
