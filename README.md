@@ -30,7 +30,7 @@ stack栈 先进后出
 
 ![集合框架](https://upload-images.jianshu.io/upload_images/898312-a5d959e2a6d5b353.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/613)
 
-——————————————————————————————————————————————————————————
+———————————————————————————————————————
 
 2.请概述下activity的生命周期和启动模式 与fragment生命周期有什么不同?
 本题侧重与android组件的运作原理 是如何产生如何结束 启动的形式如何 如下分析
@@ -54,7 +54,7 @@ singletop 栈顶复用模式 当要启动的acitivity处于栈顶 不产生实�
 singletask 栈内复用模式 当要启动的acitivity处于栈内 不产生实例而是调用onNewIntent()函数
 singleinstance 单实例模式  在栈内复用的基础上 一个activity占领一个栈  
 
-——————————————————————————————————————————————————————————
+———————————————————————————————————————
 
 3.你能说出几种设计模式？能写出单例模式的几种方式？
 这个题考验的是基本功-设计模式 设计模式
@@ -135,7 +135,8 @@ public enum SingleInstance {// 使用SingleInstance.INSTANCE.fun1(); 枚举内�
     }
 ```
 
-——————————————————————————————————————————————————————————
+———————————————————————————————————————
+
 4.android事件分发机制
 事件在三大层中传递 activity - viewgroup -view
 要传递的MotionEvent中包含了一系列用户的事件
