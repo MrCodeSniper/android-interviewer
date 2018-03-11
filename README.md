@@ -27,7 +27,10 @@ hashtable是继承自dictionary类实现map接口的 同步且元素不能为空
 queue队列 先进先出
 stack栈 先进后出
 
+
 ![集合框架](https://upload-images.jianshu.io/upload_images/898312-a5d959e2a6d5b353.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/613)
+
+——————————————————————————————————————————————————————————
 
 2.请概述下activity的生命周期和启动模式 与fragment生命周期有什么不同?
 本题侧重与android组件的运作原理 是如何产生如何结束 启动的形式如何 如下分析
@@ -50,6 +53,8 @@ standrad 每启动一个activity创建一个实例 哪个activity启动他就进
 singletop 栈顶复用模式 当要启动的acitivity处于栈顶 不产生实例而是调用onNewIntent()函数
 singletask 栈内复用模式 当要启动的acitivity处于栈内 不产生实例而是调用onNewIntent()函数
 singleinstance 单实例模式  在栈内复用的基础上 一个activity占领一个栈  
+
+——————————————————————————————————————————————————————————
 
 3.你能说出几种设计模式？能写出单例模式的几种方式？
 这个题考验的是基本功-设计模式 设计模式
@@ -130,6 +135,29 @@ public enum SingleInstance {// 使用SingleInstance.INSTANCE.fun1(); 枚举内�
     }
 ```
 
+——————————————————————————————————————————————————————————
+4.android事件分发机制
+事件在三大层中传递 activity - viewgroup -view
+要传递的MotionEvent中包含了一系列用户的事件
+处理事件有三个重要方法
+onDispatchTouchEvent 分发事件 
+onInterceptTouchEvent 拦截事件   只存在与viewgroup中 并在分发事件中被调用
+onTouchEvent 触摸事件
+三个函数返回值的意义
+return true  消费事件 自己处理
+return false 停止向下传递 开始往父类传递
+return super 按默认流程传递
 
+DecorView setContentView()的view的父view
 
+首先需要了解默认情况下事件是如何传递的：
+当一个事件产生时会传给当前activity 执行当前activity的分发事件函数 传递到DecorView底层view的ViewGroup
+执行viewgroup的事件分发函数 若返回true则消费事件 若为false则传给activity处理触摸事件函数执行
+继续执行会执行到 拦截事件函数 若返回true 即在viewgroup中处理事件函数执行 若返回false 继续往下执行
+继续执行会传递给view的事件分发函数 返回true消费 返回false 传给viewgroup 处理事件函数执行
+继续执行由view的事件函数执行 返回true消费结束 返回false or super 继续上传给viewgroup和activity触摸事件处理
+
+![事件分发](https://upload-images.jianshu.io/upload_images/3985563-d7646a08adcc7df7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/700)
+
+——————————————————————————————————————————————————————————
 
