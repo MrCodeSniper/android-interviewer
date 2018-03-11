@@ -138,6 +138,7 @@ public enum SingleInstance {// 使用SingleInstance.INSTANCE.fun1(); 枚举内�
 ———————————————————————————————————————
 
 4.android事件分发机制
+
 事件在三大层中传递 activity - viewgroup -view
 要传递的MotionEvent中包含了一系列用户的事件
 处理事件有三个重要方法
@@ -160,5 +161,72 @@ DecorView setContentView()的view的父view
 
 ![事件分发](https://upload-images.jianshu.io/upload_images/3985563-d7646a08adcc7df7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/700)
 
-——————————————————————————————————————————————————————————
+—————————————————————————————————————————
+
+5.ANR原理及源码解析
+
+ANR- Activity Not Response 应用程序未响应
+
+安卓中ActivityManageService，WindowManageService
+会检测app响应时间 若app在一段时间内无法响应触摸或者键盘 或者事件未处理完 就会出现
+
+满足以下任一条件均会产生anr： 
+
+5秒内无法响应屏幕触摸事件或键盘输入事件
+
+在执行广播接收者的onReceive()函数时10秒没有处理完成，后台为60秒。
+
+前台服务20秒内，后台服务在200秒内没有执行完毕。
+
+内容提供者的publish在10s内没进行完。
+
+产生的原因：
+
+1.主线程阻塞或主线程数据读取 （避免死锁 由自线程处理耗时操作）
+
+2.CPU满负荷，I/O阻塞        （IO操作在子线程异步执行）
+
+3.内存不足                   （优化内存占用）
+
+4.各大组件ANR              （各大组件生命周期不要做耗时操作）
+
+从源码角度分析：
+
+
+service进程在绑定后会发送延时消息
+//发送delay消息(SERVICE_TIMEOUT_MSG)
+bumpServiceExecutingLocked(r, execInFg, "create");
+
+```
+private final void bumpServiceExecutingLocked(ServiceRecord r, boolean fg, String why) {
+    ... 
+    scheduleServiceTimeoutLocked(r.app);
+}
+```
+
+```
+void scheduleServiceTimeoutLocked(ProcessRecord proc) {
+    if (proc.executingServices.size() == 0 || proc.thread == null) {
+        return;
+    }
+    long now = SystemClock.uptimeMillis();
+    Message msg = mAm.mHandler.obtainMessage(
+            ActivityManagerService.SERVICE_TIMEOUT_MSG);
+    msg.obj = proc;
+    
+    //当超时后仍没有remove该SERVICE_TIMEOUT_MSG消息，则执行service Timeout流程
+    mAm.mHandler.sendMessageAtTime(msg,
+        proc.execServicesFg ? (now+SERVICE_TIMEOUT) : (now+ SERVICE_BACKGROUND_TIMEOUT));
+}
+```
+
+总结：
+都是设置当前时间并发送一个固定时间的延时消息，然后进入目标线程创建或执行，若在这段延迟时间内不执行取消延时消息的函数，
+最后都会执行ActivityManageService.appNotResponding() 产生anr
+
+—————————————————————————————————————————
+
+
+
+
 
