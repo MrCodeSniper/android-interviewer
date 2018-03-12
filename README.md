@@ -226,6 +226,25 @@ void scheduleServiceTimeoutLocked(ProcessRecord proc) {
 
 —————————————————————————————————————————
 
+6.android动画机制与原理
+
+android有三类动画
+
+1.补间动画 
+早在android3.0之前就存在 能进行 一些简单的动画 例如 旋转 缩放 平移等
+
+2.帧动画
+
+
+
+3.属性动画
+对控件属性值进行修改达到动画的效果
+
+
+
+
+
+
 
 
 
