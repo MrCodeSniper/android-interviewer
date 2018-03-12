@@ -231,14 +231,46 @@ void scheduleServiceTimeoutLocked(ProcessRecord proc) {
 android有三类动画
 
 1.补间动画 
-早在android3.0之前就存在 能进行 一些简单的动画 例如 旋转 缩放 平移等
+早在android3.0之前就存在 能进行 一些简单的动画 例如 旋转 缩放 平移等 但是只是改变在界面上的效果
+实现 动画类来实现
 
 2.帧动画
-
-
+通过让一系列图片按顺序播放产生动画效果
+实现 xml或代码
 
 3.属性动画
-对控件属性值进行修改达到动画的效果
+通过控件属性值进行修改 不断地对值进行操作来实现的 达到动画的效果 不再是只针对view的动画
+
+原理：
+
+—————————————————————————————————————————
+
+7.android编译打包过程
+
+首先了解一下项目中 经常出现的却在脑子里不清楚的文件
+
+classes.dex
+
+android有属于自己的代码处理虚拟机 并针对手机的特性做了最佳的优化
+android虚拟机dalvik支持的字节码格式 android上可执行的文件 由java.class编译而来
+
+编译打包流程 
+
+大概步骤：应用的模块（源码，资源文件，aidl文件） 依赖文件（依赖模块，库，依赖资源） 经过编译 生成dex文件 和编译过的资源 
+并结合项目的测试或者发布的key 通过加密打包 生成apk文件(实质上为压缩文件)
+
+具体步骤：
+1.应用的资源文件通过aapt android assets package tool 打包为R.java类和编译好的资源文件（我们经常通过R.来找到编译好的资源文件）
+2.aidl文件通过aidl生成java interface代码
+3.R.java,java interface,source通过jvm 转化为.class文件
+4. class文件和第三方的库经过dex编译器生成 .dex文件
+5. dex文件和aapt编译好的资源通过apkbuilder 生成未签名的apk
+6. 未签名的apk通过jarsinger 将apk与key 签名
+7. 对签名后的apk进行对齐处理
+
+—————————————————————————————————————————
+
+
 
 
 
