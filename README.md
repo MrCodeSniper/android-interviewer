@@ -260,16 +260,144 @@ android虚拟机dalvik支持的字节码格式 android上可执行的文件 由j
 并结合项目的测试或者发布的key 通过加密打包 生成apk文件(实质上为压缩文件)
 
 具体步骤：
+
 1.应用的资源文件通过aapt android assets package tool 打包为R.java类和编译好的资源文件（我们经常通过R.来找到编译好的资源文件）
+
 2.aidl文件通过aidl生成java interface代码
+
 3.R.java,java interface,source通过jvm 转化为.class文件
+
 4. class文件和第三方的库经过dex编译器生成 .dex文件
+
 5. dex文件和aapt编译好的资源通过apkbuilder 生成未签名的apk
+
 6. 未签名的apk通过jarsinger 将apk与key 签名
+
 7. 对签名后的apk进行对齐处理
 
 —————————————————————————————————————————
 
+8.jni ndk 
+
+jni -java native interface 能实现java 和其他语言通信
+Java 需要与 本地代码 进行交互 通常用jni实现
+
+ndk-Native Development Kit android开发的一个工具包
+快速开发C、 C++的动态库，并自动将so和应用一起打包成 APK
+android中用ndk能帮助快速开发 实现jni功能
+
+ndk实际应用场景:
+优化密集运算和消耗资源较大模块的性能，如音视频解码，图像操作等
+需要提高安全性的地方，编译成 so 库不容易被反编译；如文件加密、核心算法模块等；
+
+C/C++代码被编译成库文件之后，才能执行，库文件分为动态库和静态库两种：
+动态库 在程序运行期载入库
+静态库 程序编译期就被载入
+
+
+————————————————————————————————————
+
+9.String,StringBuffer与StringBuilder的区别?
+
+String 字符串常量，是不可变的对象, 因此在每次对 String 类型进行改变的时候其实都等同于生成了一个新的 String 对象，然后将指针指向新的 String 对象，所以经常改变内容的字符串最好不要用 String
+
+StringBuffer 字符串变量,当对此对象进行改变 改变的是自身 线程安全 可将字符缓冲区在多个线程中安全的使用
+
+StringBuilder 字符串变量 线程不安全的 适合字符串缓冲区被单个线程使用时候使用
+
+————————————————————————————————————
+
+10.java四种引用（对象回收 ，引用进入引用队列）
+
+强引用
+
+Object object=new Object() 只有在object这个引用被释放后，对象才会被释放掉 即使程序报错崩溃也不会回收
+
+软引用
+
+如果一个对象持有软引用，那么当内存充足时，GC不会回收它，当内存不足时，GC会对其回收 
+软引用主要用户实现类似缓存的功能 常和一个引用队列共同使用 当软引用的对象被回收时 jvm会把这个软引用放入相关联的队列中
+
+弱引用
+
+弱引用相较于软引用有更短的生命周期，一旦GC发现只具有弱引用的对象，无论当前内存是否不足，都会对其进行回收
+弱引用主要用于监控对象是否被标记为即将被回收的垃圾
+
+虚引用
+如果一个对象仅存在一个虚引用，那么就和没有引用相同，任何时候都可能被GC回收
+虚引用主要用于跟踪GC的活动
+
+————————————————————————————————————
+
+11.MVC-MVP-MVVM （代码组织模式）
+
+mvc是最经典的模式 m包含数据逻辑状态 v包含视图显示 而c层就是分开控制m和v层的控制中枢 但是c层是activity和fragment 经常在其中做一些操作ui和保存数据的操作 耦合度高 项目大起来不容易维护 缺点还是很明显的
+
+mvp把layout和activity作为了view层 增加了presenter层做控制层 针对接口进行编程，所以业务逻辑工作交给presenter去操作 而view，model只做属于自己的工作
+消除了对特定view的耦合 灵活性大大提升
+缺点是随着业务增多 Presenter层会越变越大
+
+自身实现：
+
+1.先针对业务逻辑与界面显示划分 建立contract接口层 接口中包含 调用请求的接口 和界面变化的接口
+
+2.再写继承contract界面接口和实现contract业务接口的presenter层 在实现的业务函数中进行http请求 在请求后调用contract界面函数
+
+3.在view层实现contract的view接口，创建presenter并在合适的地方请求网络 在完善实现view的函数
+
+
+mvvm
+使用了数据绑定机制 视图可以绑定到变量和表达式
+view绑定了由viewModel暴露的变量和操作
+ViewModel负责包装模型并准备视图所需的可观察数据
+
+问题 会随着时间 xml的代码会越多 无关的展示逻辑应该直接获取值 而不是绑定
+————————————————————————————————————
+
+12. android消息机制 -源码分析
+
+成员介绍
+
+Handler:消息处理类 handlemessage函数用来处理消息 sendmessage函数向消息队列发送消息
+
+Message:消息的载体 数据结构为单链表 包含handler实例target 
+
+MessageQueue:消息队列 fifo数据结构消息的存储体 包含消息实例 通过next函数得到下一个消息 可以通过enqueue函数让消息入队
+
+Looper:消息循环类 包换消息队列实例 调用Looper.loop（）就能进入到消息循环中
+
+如何相互运作的？
+
+用户创建的线程是没有对应的looper的
+而ui线程在apk启动时 activitymanagerservice会创建actvity和对应的ui线程，在启动主线程时默认创建一个looper 并执行looper.loop进入循环中
+
+
+当我们在子线程中加载完数据需要向主线程发送信息时
+首先创建handler实例 它是我们传递消息和处理消息的关键 在此时我们还会创建handler对应的messagequeque ，但handler需依赖于looper 这样mq就与handler和looper相关联
+通过handler.obtainMessage()从消息池（也是个单链表缓冲区）里取出一个消息并装入想发送的信息
+通过handler.sendMessage() 我们把消息传入消息队列中 等待looper循环到我们消息
+looper.loop函数主要循环干了3件事情 1.读取mq的下一个消息2.把消息分给相应的target也就是handler3.再把分发后的消息回放的消息池里
+然后是handler处理消息
+在处理之前首先需要分发消息
+若消息中带了回调 则调用回调 >若handler有回调则执行回调中的处理消息方法，然后再执行自身handler处理数据
+
+```
+/**
+     * Handle system messages here.
+     */
+    public void dispatchMessage(Message msg) {
+        if (msg.callback != null) {//是一个Runnable对象，实际就是Handler的post方法所传递的Runnable参数
+            handleCallback(msg);
+        } else {
+            if (mCallback != null) {
+                if (mCallback.handleMessage(msg)) {
+                    return;
+                }
+            }
+            handleMessage(msg);//处理消息
+        }
+    }
+```
 
 
 
@@ -279,5 +407,8 @@ android虚拟机dalvik支持的字节码格式 android上可执行的文件 由j
 
 
 
+
+
+![handle机制框架](https://upload-images.jianshu.io/upload_images/5051594-156bb5b9d2cfba32.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/700)
 
 
