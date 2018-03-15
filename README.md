@@ -50,9 +50,20 @@ activity启动模式
 启动模式有四种:standrad,singletop,singleinstance,singletask
 
 standrad 每启动一个activity创建一个实例 哪个activity启动他就进那个activity所在的stack顶部
+
 singletop 栈顶复用模式 当要启动的acitivity处于栈顶 不产生实例而是调用onNewIntent()函数
+
 singletask 栈内复用模式 当要启动的acitivity处于栈内 不产生实例而是调用onNewIntent()函数
+
 singleinstance 单实例模式  在栈内复用的基础上 一个activity占领一个栈  
+
+actvity屏幕旋转
+
+android系统会在屏幕大小，方向等配置发生变化时销毁并重启Activity。
+解决办法： android:configChanges="orientation|screenSize|keyboardHidden" 
+android:screenOrientation 是横竖屏限制
+会回调onConfigurationChanged()方法
+
 
 ———————————————————————————————————————
 
@@ -416,6 +427,51 @@ looper.loop函数主要循环干了3件事情 1.读取mq的下一个消息2.把�
 
 多线程的意义在于一个应用程序中，有多个执行部分可以同时执行。但操作系统并没有将多个线程看做多个独立的应用而是看作一个进程整体，来实现进程的调度和管理
 
+线程有关的重要方法
+
+join 等待线程结束之后才能继续运行。
+
+sleep()线程休眠  不会释放锁 保持对锁的监听 占着资源
+
+object中的wait() 调用后线程挂起 会暂时释放对象锁 由其他线程获取
+
+object中的notify() 调用后线程唤醒 唤醒的同时恢复中断现场
+
+
+线程安全问题
+
+必备知识:线程锁 
+
+可重入锁 
+
+可重入就意味着：线程可以进入任何一个它已经拥有的锁所同步着的代码块。基于线程分配，而不是基于方法调用分配的，在执行对象中所有同步方法不用再次获得锁
+
+可中断锁
+
+在等待获取锁过程中可中断
+
+公平锁
+
+按等待获取锁的线程的等待时间进行获取，等待时间长的具有优先获取锁权利
+
+读写锁
+
+将对资源的访问分为读和写，进而产生出读锁和写锁,多个线程之间的读操作不会冲突 写必须同步
+
+
+synchronized 是Java 语言的关键字，内置特性
+当一个代码块synchronize 修饰了，当一个线程获取了对应的锁，并执行该代码块时，其他线程便只能一直等待，等待获取锁的线程释放锁，而这里获取锁的线程释放锁只会有两种情况 1.异常 2.执行完 适合少量同步的场景
+
+可以修饰1.代码快2.类3.静态函数4.函数（同步函数）
+
+
+Lock 是一个类，通过这个类可以实现同步访问
+必须要用户在finally手动释放锁 可以尝试获取锁 可以判断锁的状态 适合大量同步的场景
+
+
+
+
+
 
 ————————————————————————————————————
 
@@ -444,8 +500,60 @@ ps：垃圾回收器会更倾向于回收持有软引用或弱引用的对象，
 
 15.项目优化方面
 
+ui优化
 
+写布局时 使得嵌套的层级 尽量少 多使用include merge 标签  viewstub标签
 
+ViewStub是View的子类 它不可见,大小为0 用来延迟加载布局资源
+有些布局在点击展开按钮才真正需要加载.
+如果默认加载子话题的View,则会造成内存的占用和CPU的消耗
+
+```
+ViewStub myViewStub = (ViewStub)findViewById(R.id.myViewStub);   
+if (myViewStub != null) {   
+    myViewStub.inflate();   
+    //或者是下面的形式加载   
+    //myViewStub.setVisibility(View.VISIBLE);   
+}   
+```
+
+如果本打算用FrameLayout作为界面的根布局时，要用<merge>标签作为根节点
+    
+如果打算用RelateLayout或Linearlayout作为界面根布局时，界面中某些可复用的或逻辑独立的布局用<include>导入，<include>导入的布局可以考虑用<merge>作为根节点
+
+自定义view ondraw中不做耗时操作
+
+------------------------
+
+内存优化
+
+内存分析工具 mat traceview
+
+如何避免内存泄漏？
+
+------------------------
+
+线程优化
+
+线程池
+
+线程的重用
+控制线程池中的并发数
+对线程进行管理
+
+通过配置ThreadPoolExecutor来实现不同特性的线程池
+
+五种功能不一样的线程池
+newFixedThreadPool()  返回一个固定线程数量的线程池
+newCachedThreadPool() ： 返回一个可以根据实际情况调整线程池中线程的数量的线程池
+newSingleThreadExecutor() ： 返回一个只有一个线程的线程池
+newScheduledThreadPool() ： 该方法返回一个可以控制线程池内线程定时或周期性执行某任务的线程池   大小可以指定
+newSingleThreadScheduledExecutor() ：  返回一个可以控制线程池内线程定时或周期性执行某任务的线程池 大小为1
+
+ 
+通过线程池中取出线程来代替new  thread 创建线程池需要把握一个度才能合理的发挥它的优点 通常核心线程数可以设为CPU数量+1，而最大线程数可以设为CPU的数量*2+1。
+
+AsyncTask内部实现其实就是Thread+Handler AsyncTask内部实现了两个线程池 串行线程池和固定线程数量的线程池
 
 ————————————————————————————————————
 
@@ -480,7 +588,9 @@ servicemanager server和client间的桥梁 将Binder名字转换为client中对�
 
 ————————————————————————————————————
 
-17.android的存储方式（五大）
+17.android的存储方式（五大） 又称数据持久化  缓存并不是持久化 是暂时性的
+
+数据持久化就是将内存中的数据模型转化为存储模型
 
 1.数据库 orm框架 android自带有轻量级sqlite 可以存储一些简单数据，也可以通过与服务器交互上传到服务器的数据库中
 
@@ -488,7 +598,7 @@ servicemanager server和client间的桥梁 将Binder名字转换为client中对�
 
 3.文件io 存储 通过数据流的读 和写 完成
 
-4.内容提供者存储 例如 一些软件可以通过内容提供者 得到系统自带app通讯录 的数据
+4.内容提供者存储 例如 一些软件可以通过内容提供者 得到系统自带app通讯录 的数据 （数据共享）
 
 5.网络存储
 
